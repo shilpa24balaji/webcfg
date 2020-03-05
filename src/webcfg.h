@@ -36,17 +36,8 @@ extern bool g_shutdown;
 /*                             External Functions                             */
 /*----------------------------------------------------------------------------*/
 
-/**
- *  Initialize the library.
- *
- *  @param opts the configuration options to abide by
- *
- *  @return 
- */
-//void initWebConfigMultipartTask();
-
-void processWebconfgSync(int index);
-
+void processWebconfgSync(char* doc);
+int webcfg_http_request(char **configData, int r_count, char* doc, int status, long *code, char **transaction_id,char** contentType, size_t* dataSize);
 /**
 * @brief webcfgStrncpy WAL String copy function that copies the content of source string into destination string and null terminates the destination string
 *

@@ -89,6 +89,21 @@ int _setConfigVersion(int index, char *version)
 	UNUSED(version);
 	return 0;
 }
+
+int getForceSync(char** pString, char **transactionId)
+{
+	UNUSED(pString);
+	UNUSED(transactionId);
+	return 0;
+}
+int setForceSync(char* pString, char *transactionId,int *session_status)
+{
+	UNUSED(pString);
+	UNUSED(transactionId);
+	UNUSED(session_status);
+	return 0;
+}
+
 void getDeviceMac()
 {
 	return;
@@ -155,8 +170,10 @@ void test_multipart()
 	//size_t encodeSize = 0;
 	//size_t subLen=0;
 	//int status=0, 
-	int index=0;
-//char *transaction_uuid =NULL;
+	//int index=0;
+	char *doc = NULL;
+	doc = strdup("moca,ble");
+	//char *transaction_uuid =NULL;
 	
 	//char * decodeMsg =NULL;
 	//size_t decodeMsgSize =0;
@@ -172,7 +189,7 @@ void test_multipart()
 		return;
 	}
 	//configRet = webcfg_http_request(&webConfigData, r_count, index, status, &res_code, &transaction_uuid, &ct, &dataSize);
-	processWebconfgSync(index);
+	processWebconfgSync(doc);
 	if(configRet == 0)
 	{
 		printf("config ret success\n");

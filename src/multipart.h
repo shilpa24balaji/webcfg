@@ -41,7 +41,6 @@ typedef struct {
  *
  *  @return 0 on success, error otherwise
  */
-int webcfg_http_request(char **configData, int r_count, int index, int status, long *code, char **transaction_id,char** contentType, size_t* dataSize);
 int writeToFile(char *filename, char *data, int len);
 int readFromFile(char *filename, char **data, int *len);
 int parseMultipartDocument(void *config_data, char *ct , size_t data_size);

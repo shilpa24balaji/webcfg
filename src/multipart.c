@@ -58,7 +58,7 @@ static char g_ModelName[64]={'\0'};
 size_t writer_callback_fn(void *buffer, size_t size, size_t nmemb, struct token_data *data);
 size_t headr_callback(char *buffer, size_t size, size_t nitems);
 void stripspaces(char *str, char **final_str);
-void createCurlHeader( struct curl_slist *list, struct curl_slist **header_list, int status, int index, char ** trans_uuid);
+void createCurlHeader( struct curl_slist *list, struct curl_slist **header_list, int status, char *doc, char ** trans_uuid);
 void parse_multipart(char *ptr, int no_of_bytes, multipartdocs_t *m, int *no_of_subdocbytes);
 void multipart_destroy( multipart_t *m );
 char* generate_trans_uuid();
@@ -73,7 +73,7 @@ int processMsgpackSubdoc(multipart_t *mp);
 * @param[in] r_count Number of curl retries on ipv4 and ipv6 mode during failure
 * @return returns 0 if success, otherwise failed to fetch auth token and will be retried.
 */
-int webcfg_http_request(char **configData, int r_count, int index, int status, long *code, char **transaction_id, char** contentType, size_t *dataSize)
+int webcfg_http_request(char **configData, int r_count, char* doc, int status, long *code, char **transaction_id, char** contentType, size_t *dataSize)
 {
 	CURL *curl;
 	CURLcode res;
@@ -93,6 +93,8 @@ int webcfg_http_request(char **configData, int r_count, int index, int status, l
 	struct token_data data;
 	data.size = 0;
 	void * dataVal = NULL;
+	char syncURL[256]={'\0'};
+
 	WebConfigLog("Inside webcfg_http_request.\n");
 	curl = curl_easy_init();
 	if(curl)
@@ -105,13 +107,24 @@ int webcfg_http_request(char **configData, int r_count, int index, int status, l
 			return rv;
 		}
 		data.data[0] = '\0';
-		createCurlHeader(list, &headers_list, status, index, &transID);
+		createCurlHeader(list, &headers_list, status, doc, &transID);
 		if(transID !=NULL)
 		{
 			*transaction_id = strdup(transID);
 			WEBCFG_FREE(transID);
 		}
+		WebConfigLog("webConfigURL readFromFile\n");
 		readFromFile(WEBCFG_URL_FILE, &webConfigURL, &len );
+
+		//Update query param in the URL based on the doc name for force sync
+		if (doc != NULL)
+		{
+			WebConfigLog("update webConfigURL based on sync doc\n");
+			snprintf(syncURL, MAX_BUF_SIZE, "%s?group_id=%s", webConfigURL, doc);
+			WebConfigLog("syncURL is %s\n", syncURL);
+			webConfigURL =strdup( syncURL);
+		}
+
 		if(webConfigURL !=NULL)
 		{
 			WebConfigLog("webconfig root ConfigURL is %s\n", webConfigURL);
@@ -188,7 +201,9 @@ int webcfg_http_request(char **configData, int r_count, int index, int status, l
 			WebConfigLog("curl response Time: %.1f seconds\n", total);
 		}
 		curl_slist_free_all(headers_list);
+		WebConfigLog("free webConfigURL\n");
 		WEBCFG_FREE(webConfigURL);
+		WebConfigLog("After free webConfigURL\n");
 		if(res != 0)
 		{
 			WebConfigLog("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
@@ -526,7 +541,7 @@ int readFromFile(char *filename, char **data, int *len)
  * @param[in] device status value
  * @param[out] header_list output curl header list
 */
-void createCurlHeader( struct curl_slist *list, struct curl_slist **header_list, int status, int index, char ** trans_uuid)
+void createCurlHeader( struct curl_slist *list, struct curl_slist **header_list, int status, char* doc, char ** trans_uuid)
 {
 	char *version_header = NULL;
 	char *auth_header = NULL;
@@ -543,8 +558,8 @@ void createCurlHeader( struct curl_slist *list, struct curl_slist **header_list,
 	char *uuid_header = NULL;
 	char *transaction_uuid = NULL;
 	char *version = NULL;
-	//char* syncTransID = NULL;
-	//BOOL ForceSyncEnable;
+	char* syncTransID = NULL;
+	char* ForceSyncDoc = NULL;
 
 	WebConfigLog("Start of createCurlheader\n");
 	//Fetch auth JWT token from cloud.
@@ -564,7 +579,7 @@ void createCurlHeader( struct curl_slist *list, struct curl_slist **header_list,
 	version_header = (char *) malloc(sizeof(char)*MAX_BUF_SIZE);
 	if(version_header !=NULL)
 	{
-		printf("index is %d\n", index);
+		printf("doc is %s\n", doc);
 		//_getConfigVersion(index, &version); :TODO
 		snprintf(version_header, MAX_BUF_SIZE, "IF-NONE-MATCH:%s", ((NULL != version && (strlen(version)!=0)) ? version : "NONE"));
 		WebConfigLog("version_header formed %s\n", version_header);
@@ -695,16 +710,19 @@ void createCurlHeader( struct curl_slist *list, struct curl_slist **header_list,
                 WebConfigLog("Failed to get systemReadyTime\n");
         }
 
-	/*getForceSyncCheck(&ForceSyncEnable, &syncTransID);
+	WebConfigLog("B4 getForceSync\n");
+	getForceSync(&ForceSyncDoc, &syncTransID);
+	WebConfigLog("ForceSyncDoc %s syncTransID %s\n", ForceSyncDoc, syncTransID);
 	if(syncTransID !=NULL)
 	{
-		if(ForceSyncEnable && strlen(syncTransID)>0)
+		if(ForceSyncDoc && strlen(syncTransID)>0)
 		{
 			WebConfigLog("updating transaction_uuid with force syncTransID\n");
 			transaction_uuid = strdup(syncTransID);
 		}
 		WEBCFG_FREE(syncTransID);
-	}*/
+	}
+	WebConfigLog("transaction_uuid is %s\n", transaction_uuid);
 
 	if(transaction_uuid == NULL)
 	{

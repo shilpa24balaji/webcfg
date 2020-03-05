@@ -40,6 +40,8 @@ bool _getRequestTimeStamp(int index,char **RequestTimeStamp);
 int _setRequestTimeStamp(int index);
 int _setSyncCheckOK(int index, bool status);
 int _setConfigVersion(int index, char *version);
+int setForceSync(char* pString, char *transactionId,int *session_status);
+int getForceSync(char** pString, char **transactionId);
 
 char *get_global_systemReadyTime();
 char* getDeviceBootTime();

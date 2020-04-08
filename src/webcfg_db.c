@@ -623,7 +623,25 @@ void addToDBList(webconfig_db_data_t *webcfgdb)
       }
 }
 
-char * get_DB_BLOB_base64(size_t *len)
+char * get_DB_BLOB_base64()
+{
+    char* b64buffer =  NULL;
+    size_t encodeSize = 0;
+    blob_t * db_blob = get_DB_BLOB();
+
+    	WebConfigLog("-----------Start of Base64 Encode ------------\n");
+	encodeSize = b64_get_encoded_buffer_size( db_blob->len );
+	WebConfigLog("encodeSize is %d\n", encodeSize);
+	b64buffer = malloc(encodeSize + 1);
+	b64_encode((uint8_t *)db_blob->data, db_blob->len, (uint8_t *)b64buffer);
+	b64buffer[encodeSize] = '\0' ;
+	WebConfigLog("b64buffer is %s\n", b64buffer);
+	WebConfigLog("---------- End of Base64 Encode -------------\n");
+    
+    return b64buffer;
+}
+
+/**char * get_DB_BLOB_base64(size_t *len)
 {
     char * decodeMsg = NULL;
     blob_t * temp_blob = (blob_t *)malloc(sizeof(blob_t));
@@ -631,7 +649,7 @@ char * get_DB_BLOB_base64(size_t *len)
     *len = temp_blob->len; 
     b64_encoder(temp_blob->data, temp_blob->len, &decodeMsg);
     return decodeMsg;
-}
+}*/
 
 void b64_encoder(const void *buf,size_t len, char ** decodeMsg)
 {

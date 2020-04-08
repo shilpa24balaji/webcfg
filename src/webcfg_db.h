@@ -111,7 +111,7 @@ int readBlobFromFile(char * blob_file_path);
 
 int writeBlobToFile(char *blob_file_path, char *data);
 
-char * get_DB_BLOB_base64(size_t *len);
+char * get_DB_BLOB_base64();
 /**
  *  This function converts a msgpack buffer into an webconfig_db_t structure
  *  if possible.

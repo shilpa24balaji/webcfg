@@ -99,6 +99,7 @@ WEBCFG_STATUS initDB(char * db_file_path )
     }
      fseek(fp, 0, SEEK_SET);
      data = (char *) malloc(sizeof(char) * (ch_count + 1));
+     memset(data,0,(ch_count + 1));
      sz = fread(data, 1, ch_count,fp);
      if (sz == (size_t)-1) 
 	{	
@@ -110,8 +111,13 @@ WEBCFG_STATUS initDB(char * db_file_path )
      len = ch_count;
      fclose(fp);
 
+     WebcfgDebug("File data read len %d\n");
      dm = decodeData((void *)data, len);
-     webcfgdb_destroy (dm );
+
+     if(NULL == dm)
+	WebcfgError("Msgpack decode failed\n");
+     else
+     	webcfgdb_destroy (dm );
      WEBCFG_FREE(data);
      generateBlob();
      return WEBCFG_SUCCESS;
@@ -603,6 +609,11 @@ int process_webcfgdbparams( webconfig_db_data_t *e, msgpack_object_map *map )
 
 int process_webcfgdb( webconfig_db_data_t *wd, msgpack_object *obj )
 {
+    if(NULL == obj)
+	WebcfgError("Msgpack decode obj NULL\n");
+    if(NULL == &obj->via.array)
+	WebcfgError("Msgpack obj array NULL\n");
+	
     msgpack_object_array *array = &obj->via.array;
     if( 0 < array->size )
     {

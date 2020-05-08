@@ -528,23 +528,22 @@ WEBCFG_STATUS processMsgpackSubdoc(multipart_t *mp, char *transaction_id)
 					if(success_count ==(int) mp->entries_count-1)
 					{
 						char * temp = strdup(g_ETAG);
-						webconfig_db_data_t * webcfgdb = NULL;
-						webcfgdb = (webconfig_db_data_t *) malloc (sizeof(webconfig_db_data_t));
-
-						webcfgdb->name = strdup("root");
+						uint32_t version=0;
 						if(temp)
 						{
-							webcfgdb->version = strtoul(temp,NULL,0);
+							version = strtoul(temp,NULL,0);
 							WEBCFG_FREE(temp);
 						}
-						webcfgdb->next = NULL;
-						addToDBList(webcfgdb);
-                        			success_count++;
+						if(version != 0)
+						{
+							checkDBList("root",version);
+                        				success_count++;
+						}
 
-						WebcfgInfo("The Etag is %lu\n",(long)webcfgdb->version );
+						WebcfgInfo("The Etag is %lu\n",(long)version );
 						//Delete tmp queue root as all docs are applied
 						WebcfgInfo("Delete tmp queue root as all docs are applied\n");
-						WebcfgDebug("root version to delete is %lu\n", (long)webcfgdb->version);
+						WebcfgDebug("root version to delete is %lu\n", (long)version);
 						dStatus = deleteFromTmpList("root");
 						if(dStatus == 0)
 						{

@@ -225,30 +225,44 @@ char * webcfg_appendeddoc(char * subdoc_name, uint32_t version, char * blob_data
 
         appenddata->subdoc_name = strdup(subdoc_name);
         appenddata->version = version;
-        appenddata->transaction_id = generateTransactionId(1001,9999);
+        appenddata->transaction_id = generateTransactionId();
 	WebcfgInfo("subdoc_name: %s, version: %lu, transaction_id: %hu\n", subdoc_name, (unsigned long)version, appenddata->transaction_id);
-    }
 
-    appenddocPackSize = webcfg_pack_appenddoc(appenddata, &appenddocdata);
-    WebcfgDebug("data packed is %s\n", (char*)appenddocdata);
+    	appenddocPackSize = webcfg_pack_appenddoc(appenddata, &appenddocdata);
+    	WebcfgDebug("data packed is %s\n", (char*)appenddocdata);
  
-    free(appenddata->subdoc_name);
-    free(appenddata);
+    	WEBCFG_FREE(appenddata->subdoc_name);
+    	WEBCFG_FREE(appenddata);
 
-    embeddeddocPackSize = appendWebcfgEncodedData(&embeddeddocdata, (void *)blob_data, blob_size, appenddocdata, appenddocPackSize);
-    WebcfgInfo("appenddocPackSize: %zu, blobSize: %zu, embeddeddocPackSize: %zu\n", appenddocPackSize, blob_size, embeddeddocPackSize);
-    WebcfgDebug("The embedded doc data is %s\n",(char*)embeddeddocdata);
+    	embeddeddocPackSize = appendWebcfgEncodedData(&embeddeddocdata, (void *)blob_data, blob_size, appenddocdata, appenddocPackSize);
+    	WebcfgInfo("appenddocPackSize: %zu, blobSize: %zu, embeddeddocPackSize: %zu\n", appenddocPackSize, blob_size, embeddeddocPackSize);
+    	WebcfgDebug("The embedded doc data is %s\n",(char*)embeddeddocdata);
 
-    finaldocdata = base64blobencoder((char *)embeddeddocdata, embeddeddocPackSize);
-    WebcfgDebug("The encoded append doc is %s\n",finaldocdata);
+   	 finaldocdata = base64blobencoder((char *)embeddeddocdata, embeddeddocPackSize);
+    	WebcfgDebug("The encoded append doc is %s\n",finaldocdata);
+    }
+    
     return finaldocdata;
 }
 
-uint16_t generateTransactionId(int min, int max)
+uint16_t generateTransactionId()
 {
-    srand(time(0));
-    return (uint16_t)((rand() % 
-           (max - min + 1)) + min);
+    FILE *fp;
+	uint16_t random_key,sz;
+	fp = fopen("/dev/urandom", "r");
+	if (fp == NULL){
+    		return 0;
+    	}    	
+	sz = fread(&random_key, sizeof(random_key), 1, fp);
+	if (!sz)
+	{	
+		fclose(fp);
+		WebcfgError("fread failed.\n");
+		return 0;
+	}
+	WebcfgDebug("generateTransactionId\n %d",random_key);
+	fclose(fp);		
+	return(random_key);
 }
 
 int writeToFileData(char *db_file_path, char *data, size_t size)

@@ -230,22 +230,20 @@ void* processSubdocEvents()
 					WebcfgInfo("ACK event. doc apply success, proceed to add to DB\n");
 					//check version for ack, nack is it required?
 					ts = stopWebcfgTimer(eventParam->subdoc_name, eventParam->trans_id);
-					if(ts == WEBCFG_SUCCESS)
-					{
-						//add to DB, update tmp list and notification based on success ack.
+					
+					//add to DB, update tmp list and notification based on success ack.
 
-						sendSuccessNotification(eventParam->subdoc_name, eventParam->version);
-						WebcfgInfo("AddToDB subdoc_name %s version %lu\n", eventParam->subdoc_name, (long)eventParam->version);
-						checkDBList(eventParam->subdoc_name,eventParam->version);
-						WebcfgInfo("checkRootUpdate\n");
-						if(checkRootUpdate() == WEBCFG_SUCCESS)
-						{
-							WebcfgInfo("updateRootVersionToDB\n");
-							updateRootVersionToDB();
-						}
-						addNewDocEntry(get_successDocCount());
-						WebcfgInfo("After blob addNewDocEntry to DB\n");
+					sendSuccessNotification(eventParam->subdoc_name, eventParam->version);
+					WebcfgInfo("AddToDB subdoc_name %s version %lu\n", eventParam->subdoc_name, (long)eventParam->version);
+					checkDBList(eventParam->subdoc_name,eventParam->version);
+					WebcfgInfo("checkRootUpdate\n");
+					if(checkRootUpdate() == WEBCFG_SUCCESS)
+					{
+						WebcfgInfo("updateRootVersionToDB\n");
+						updateRootVersionToDB();
 					}
+					addNewDocEntry(get_successDocCount());
+					WebcfgInfo("After blob addNewDocEntry to DB\n");
 				}
 				else if (((eventParam->status !=NULL)&&(strcmp(eventParam->status, "NACK")==0)) && (eventParam->timeout == 0))
 				{

@@ -98,7 +98,7 @@ static void connect_parodus()
 	char *client_url = NULL;
 
 	max_retry_sleep = (int) pow(2, backoff_max_time) -1;
-	WebcfgInfo("max_retry_sleep is %d\n", max_retry_sleep );
+	WebcfgDebug("max_retry_sleep is %d\n", max_retry_sleep );
 
 	get_parodus_url(&parodus_url, &client_url);
 
@@ -131,7 +131,7 @@ static void connect_parodus()
 				WebcfgError("Init for parodus failed: '%s'\n",libparodus_strerror(ret));
 				if (akerwait__ (backoffRetryTime))
 				{
-					WebcfgInfo("g_shutdown true, break connect_parodus wait\n");
+					WebcfgDebug("g_shutdown true, break connect_parodus wait\n");
 					break;
 				}
 				c++;
@@ -140,7 +140,7 @@ static void connect_parodus()
 				{
 					c = 2;
 					backoffRetryTime = 0;
-					WebcfgInfo("backoffRetryTime reached max value, reseting to initial value\n");
+					WebcfgInfo("backoffRetryTime reached max value %d, reseting to initial value\n", max_retry_sleep);
 				}
 			}
 			retval = libparodus_shutdown(&webcfg_instance);
@@ -246,7 +246,7 @@ static void get_parodus_url(char **parodus_url, char **client_url)
 	else
 	{
 		WebcfgError("Failed to open device.properties file:%s\n", DEVICE_PROPS_FILE);
-		WebcfgInfo("Adding default values for parodus_url and client_url\n");
+		WebcfgDebug("Adding default values for parodus_url and client_url\n");
 		*parodus_url = strdup(PARODUS_URL_DEFAULT);
 		*client_url = strdup(CLIENT_URL_DEFAULT);
 	}
@@ -258,7 +258,7 @@ static void get_parodus_url(char **parodus_url, char **client_url)
 	}
 	else
 	{
-		WebcfgInfo("parodus_url formed is %s\n", *parodus_url);
+		WebcfgDebug("parodus_url formed is %s\n", *parodus_url);
 	}
 
 	if (NULL == *client_url)
@@ -268,7 +268,7 @@ static void get_parodus_url(char **parodus_url, char **client_url)
 	}
 	else
 	{
-		WebcfgInfo("client_url formed is %s\n", *client_url);
+		WebcfgDebug("client_url formed is %s\n", *client_url);
 	}
 }
 

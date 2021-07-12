@@ -164,7 +164,7 @@ int send_aker_blob(char *paramName, char *blob, uint32_t blobSize, uint16_t docT
 			sendStatus = libparodus_send(get_webcfg_instance(), msg);
 			if(sendStatus == 0)
 			{
-				WebcfgInfo("Sent blob successfully to parodus\n");
+				WebcfgInfo("Sent aker blob successfully to parodus\n");
 				ret = WDMP_SUCCESS;
 				retry_count = 0;
 				break;
@@ -175,7 +175,7 @@ int send_aker_blob(char *paramName, char *blob, uint32_t blobSize, uint16_t docT
 				WebcfgInfo("send_aker_blob backoffRetryTime %d seconds\n", backoffRetryTime);
 				if (akerwait__ (backoffRetryTime))
 				{
-					WebcfgInfo("g_shutdown true, break send_aker_blob failure\n");
+					WebcfgDebug("g_shutdown true, break send_aker_blob failure\n");
 					break;
 				}
 				c++;

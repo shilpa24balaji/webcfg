@@ -176,7 +176,7 @@ int checkMaintenanceTimer()
 	if(cur_time_in_sec >= get_global_maintenance_time())
 	{
 		set_global_supplementarySync(1);
-		WebcfgInfo("Maintenance time is equal to current time\n");
+		WebcfgDebug("Maintenance time is equal to current time\n");
 		return 1;
 	}
 	return 0;
@@ -194,7 +194,6 @@ int getMaintenanceSyncSeconds(int maintenance_count)
 
 	current_time = ct.tv_sec;
 	current_time_in_sec = getTimeInSeconds(current_time);
-
 	maintenance_secs =  get_global_maintenance_time() - current_time_in_sec;
 
 	WebcfgDebug("The current time in maintenanceSyncSeconds is %lld at %s\n",current_time, printTime(current_time));
@@ -316,7 +315,7 @@ int checkRetryTimer( long long timestamp)
 
 	if(cur_time >= timestamp)
 	{
-		WebcfgInfo("Retry timestamp is equal to current time\n");
+		WebcfgDebug("Retry timestamp is equal to current time\n");
 		return 1;
 	}
 	return 0;
